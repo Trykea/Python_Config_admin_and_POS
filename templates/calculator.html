@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .calculator {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .calculator h1 {
+            margin-bottom: 20px;
+        }
+
+        .calculator div {
+            margin-bottom: 10px;
+        }
+
+        .calculator label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .calculator input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .buttons button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #1DB954;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .buttons button:hover {
+            background-color: #17a848;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>☣️Calculator☢️</h1>
+        <div>
+            <label for="valueA">Value A</label>
+            <input type="number" id="valueA">
+        </div>
+        <div>
+            <label for="valueB">Value B</label>
+            <input type="number" id="valueB">
+        </div>
+        <div class="buttons">
+            <button onclick="calculate('sum')">Sum</button>
+            <button onclick="calculate('minus')">Minus</button>
+            <button onclick="calculate('multiply')">Multiply</button>
+            <button onclick="calculate('divide')">Divide</button>
+        </div>
+        <div>
+            <p id="result">Result(A + B) : ....</p>
+        </div>
+    </div>
+    <script>
+        function calculate(operation) {
+            const valueA = parseFloat(document.getElementById('valueA').value);
+            const valueB = parseFloat(document.getElementById('valueB').value);
+            let result;
+
+            if (isNaN(valueA) || isNaN(valueB)) {
+                result = 'Please enter valid numbers';
+            } else {
+                switch (operation) {
+                    case 'sum':
+                        result = valueA + valueB;
+                        document.getElementById('result').innerText = `Result(A + B) : ${result}`;
+                        break;
+                    case 'minus':
+                        result = valueA - valueB;
+                        document.getElementById('result').innerText = `Result(A - B) : ${result}`;
+                        break;
+                    case 'multiply':
+                        result = valueA * valueB;
+                        document.getElementById('result').innerText = `Result(A * B) : ${result}`;
+                        break;
+                    case 'divide':
+                        if (valueB === 0) {
+                            result = 'Cannot divide by zero';
+                        } else {
+                            result = valueA / valueB;
+                        }
+                        document.getElementById('result').innerText = `Result(A / B) : ${result}`;
+                        break;
+                    default:
+                        result = 'Invalid operation';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

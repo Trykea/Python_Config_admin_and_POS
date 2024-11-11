@@ -1,0 +1,373 @@
+{% extends 'admin/main_layout.html' %}
+{% block title %}<title>User</title>{% endblock %}
+
+{% block content %}
+    <div id="app" class="content-wrapper">
+        <!-- Modal -->
+        <div id="modal" class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false"
+             tabindex="-1"
+             aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Add New User</h5>
+
+                    </div>
+                    <div class="modal-body">
+                        <form enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input v-model="form.name" type="text" class="form-control" id="name" name="name"
+                                       required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select v-model="form.gender" class="form-control" id="gender" name="gender">
+                                    <option value="M">male</option>
+                                    <option value="F">female</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input v-model="form.phone" type="text" class="form-control" id="phone" name="phone"
+                                       required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input v-model="form.email" type="email" class="form-control" id="email" name="email"
+                                       required>
+                            </div>
+                            <div class="form-group">
+                                <label for="address">Adress</label>
+                                <textarea v-model="form.address" type="text" class="form-control" id="address"
+                                          name="address" required>[[form.address]]</textarea>
+                            </div>
+
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger"
+                                @click="closeModal()">
+                            <i class="fas fa-times-circle"></i>
+                            Close
+                        </button>
+                        <button @click="onSave()"
+                                v-if="status=='add'" type="button" class="btn btn-outline-primary">
+                            <i class="fas fa-save"></i>
+                            Save
+                        </button>
+                        <button @click="edit()"
+                                v-if="status=='edit'" type="button" class="btn btn-outline-primary">
+                            <i class="fas fa-save"></i>
+                            Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">User</h1>
+                    </div><!-- /.col -->
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Dashboard</li>
+                        </ol>
+                    </div><!-- /.col -->
+                </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content-header -->
+
+        <!-- Main content -->
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <button class="btn  btn-outline-primary"
+                                        @click="openModal()">
+                                    <i class="fas fa-plus-circle"></i>
+                                    Add New
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+
+                                    <table class="table table-striped">
+                                        <thead>
+                                        <tr class="bg-primary">
+                                            <th>No.</th>
+                                            <th>Name</th>
+                                            <th>Password</th>
+                                            <th>Gender</th>
+                                            <th>Phone</th>
+                                            <th>Email</th>
+                                            <th>Address</th>
+                                            <th>Action</th>
+
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        <tr
+                                                v-for="(item,index) in user_list"
+                                                :key="'user_list_'+ index"
+                                        >
+                                            <td>[[index +1]]</td>
+                                            <td>[[item.name]]</td>
+                                            <td>******</td>
+                                            <td>[[item.gender]]</td>
+                                            <td>[[item.phone]]</td>
+                                            <td>[[item.email]]</td>
+                                            <td>[[item.address]]</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-primary mr-2 ml-2"
+                                                        @click="getEdit(item)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        @click="deleteRecord(item.id)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <!-- /.col-md-6 -->
+                </div>
+                <!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content -->
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        const {createApp} = Vue
+        createApp({
+            delimiters: ['[[', ']]'],
+            created() {
+                this.fetchData()
+            },
+            mounted() {
+
+            },
+            data() {
+                return {
+
+                    user_list: [
+                        {
+                            'id': 1,
+                            'name': 'dara',
+                            'gender': 'M',
+                            'password': '12312',
+                            'phone': '01123141',
+                            'email': 'dara@mail.com',
+                            'address': 'PP',
+                        },
+                        {
+                            'id': 2,
+                            'name': 'Thida',
+                            'gender': 'F',
+                            'password': '12312',
+                            'phone': '02323432',
+                            'email': 'thida@mail.com',
+                            'address': 'SR',
+                        }
+                    ],
+                    form: {
+                        'id': null,
+                        'name': null,
+                        'gender': 'M',
+                        'password': '12312',
+                        'phone': '+855',
+                        'email': 'example@mail.com',
+                        'address': '',
+                    },
+                    status: 'add',
+                }
+            },
+            methods: {
+                openModal() {
+                    this.status = 'add'
+                    $('#modal').modal('show')
+                },
+                closeModal() {
+                    let vm = this
+                    Swal.fire({
+                        title: "Do you want to close form?",
+                        showDenyButton: true,
+                        showCancelButton: false,
+                        confirmButtonText: "Yes",
+                        denyButtonText: `Cancel`
+                    }).then((result) => {
+                        /* Read more about isConfirmed, isDenied below */
+                        if (result.isConfirmed) {
+                            // this.student_list.splice(index, 1)
+                            vm.clearForm()
+                            $('#modal').modal('hide')
+
+                        } else if (result.isDenied) {
+
+                        }
+                    });
+
+                },
+                getEdit(item) {
+                    this.status = 'edit'
+                    this.form.id = item.id
+                    this.form.name = item.name
+                    this.form.gender = item.gender
+                    this.form.phone = item.phone
+                    this.form.email = item.email
+                    this.form.address = item.address
+                    $('#modal').modal('show')
+                },
+                clearForm() {
+                    this.form.stat = 'add'
+                    this.form.id = null
+                    this.form.name = null
+                    this.form.password = null
+                    this.form.gender = "M"
+                    this.form.phone = "+855-"
+                    this.form.email = '@gmail.com'
+                    this.form.address = ''
+
+                    $('#modal').modal('hide')
+                },
+                deleteRecord(id) {
+                    let vm = this
+                    Swal.fire({
+                        title: "Do you want to save the changes?",
+                        showDenyButton: true,
+                        showCancelButton: false,
+                        confirmButtonText: "Delete",
+                        denyButtonText: `Cancel`
+                    }).then((result) => {
+                        /* Read more about isConfirmed, isDenied below */
+                        if (result.isConfirmed) {
+                            // this.student_list.splice(index, 1)
+                            {#alert('deleted' + id)#}
+                            $.LoadingOverlay("show");
+                            let vm = this
+                            let input = this.form
+                            let api_url = "http://127.0.0.1:5000/admin/delete-user"
+                            axios.post(api_url, {user_id:id})
+                                .then(function (response) {
+                                    // handle success
+
+                                    vm.fetchData()
+                                    $.LoadingOverlay("hide");
+                                })
+                                .catch(function (error) {
+                                    // handle error
+                                    console.log(error);
+                                })
+                        } else if (result.isDenied) {
+
+                        }
+                    });
+                },
+                fetchData() {
+                    let vm = this
+                    $.LoadingOverlay("show");
+                    let api_url = "http://127.0.0.1:5000/admin/get-user"
+                    // Make a request for a user with a given ID
+                    axios.get(api_url)
+                        .then(function (response) {
+                            // handle success
+
+                            vm.user_list = response.data
+                            $.LoadingOverlay("hide");
+                        })
+                        .catch(function (error) {
+                            // handle error
+                            console.log(error);
+                        })
+
+                },
+                onSave() {
+
+                    if (this.form.name == null || this.form.name == "") {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Name Field cannot empty",
+                            footer: '<a href="#">Why do I have this issue?</a>'
+
+                        });
+                        return
+
+                    }
+                    $.LoadingOverlay("show");
+                    let vm = this
+                    let input = this.form
+                    let api_url = "http://127.0.0.1:5000/admin/create-user"
+                    axios.post(api_url, input)
+                        .then(function (response) {
+                            // handle success
+                            {#console.log(response)#}
+                            vm.fetchData()
+                            $.LoadingOverlay("hide");
+                        })
+                        .catch(function (error) {
+                            // handle error
+                            console.log(error);
+                        })
+                    this.clearForm()
+                },
+                edit() {
+
+                    if (this.form.name == null || this.form.name == "") {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Name Field cannot empty",
+                            footer: '<a href="#">Why do I have this issue?</a>'
+
+                        });
+                        return
+
+                    }
+                    $.LoadingOverlay("show");
+                    let vm = this
+                    let input = this.form
+                    let api_url = "http://127.0.0.1:5000/admin/update-user"
+                    axios.post(api_url, input)
+                        .then(function (response) {
+                            // handle success
+                            {#console.log(response)#}
+                            vm.fetchData()
+                            $.LoadingOverlay("hide");
+                        })
+                        .catch(function (error) {
+                            // handle error
+                            console.log(error);
+                        })
+                    this.clearForm()
+                },
+
+
+            },
+        }).mount('#app')
+    </script>
+{% endblock %}

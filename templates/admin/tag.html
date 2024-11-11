@@ -1,0 +1,300 @@
+{% extends 'admin/main_layout.html' %}
+{% block title %}Tag{% endblock %}
+
+
+{% block content %}
+    <div id="app" class="content-wrapper">
+        <!-- Modal -->
+        <div
+                class="modal fade" id="model"
+                data-backdrop="static" data-keyboard="false" tabindex="-1"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true"
+        >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Add New Tag</h5>
+                    </div>
+                    <div class="modal-body">
+                        <form
+                                enctype="multipart/form-data"
+                        >
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input v-model="form.name" required type="text" class="form-control" id="name"
+                                       name="name">
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea v-model="form.description" class="form-control" id="description" name="description">[[ form.description ]]</textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                                @click="closeModel()"
+                                type="button"
+                                class="btn btn-outline-danger"
+                        >
+                            <i class="fas fa-times-circle"></i>
+                            Close
+                        </button>
+                        <button
+                                @click="onSave()"
+                                v-if="status == 'Add'"
+                                type="button"
+                                class="btn btn-outline-primary"
+                        >
+                            <i class="nav-icon fas fa-save"></i>
+                            Save
+                        </button>
+                        <button
+                                @click="edit()"
+                                v-if="status == 'Edit'"
+                                type="button"
+                                class="btn btn-outline-primary"
+                        >
+                            <i class="nav-icon fas fa-save"></i>
+                            Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Content Wrapper. Contains page content -->
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">Tag</h1>
+                    </div><!-- /.col -->
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Dashboard</li>
+                        </ol>
+                    </div><!-- /.col -->
+                </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content-header -->
+
+        <!-- Main content -->
+        <div class="content">
+            <div class="container-fluid">
+                <!-- /.row -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card card-primary card-outline">
+                            <div class="card-header">
+                                <button
+                                        @click="openModel()"
+                                        class="btn  btn-outline-primary"
+                                >
+                                    <i class="nav-icon fas fa-plus-circle"></i>
+                                    Add New
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                        <tr class="bg-primary">
+                                            <th>No.</th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr
+                                                v-for="(item, index) in tag_list"
+                                                :key="'tag_list_'+index"
+                                        >
+                                            <td>[[ index + 1 ]]</td>
+                                            <td>[[ item.name ]]</td>
+                                            <td>[[ item.description ]]</td>
+                                            <td>
+                                                <button
+                                                        @click="getEdit(item)"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                    <i class="nav-icon fas fa-edit"></i>
+                                                </button>
+                                                <button
+                                                        @click="deleteRecord(item.id)"
+                                                        class="btn btn-sm btn-outline-danger">
+                                                    <i class="nav-icon fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.col-md-6 -->
+                </div>
+                <!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content -->
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        const {createApp, ref} = Vue
+        createApp({
+            delimiters: ['[[', ']]'],
+            created() {
+                this.fetchData()
+            },
+            mounted() {
+                //this.openModel()
+            },
+            data() {
+                return {
+                    form: {
+                        'id': null,
+                        'name': null,
+                        'description': '',
+                    },
+                    status: 'Add',
+                    tag_list: [],
+                }
+            },
+            methods: {
+                openModel() {
+                    this.status = 'Add'
+                    $('#model').modal('show')
+                },
+                closeModel() {
+                    this.clearForm();
+                    $('#model').modal('hide')
+                },
+                fetchData() {
+                    let vm = this
+                    $.LoadingOverlay("show");
+                    let api_url = "http://127.0.0.1:5000/admin/get-tag"
+                    axios.get(api_url)
+                        .then(function (response) {
+                            vm.tag_list = response.data
+                            $.LoadingOverlay("hide");
+
+                        })
+                        .catch(function (error) {
+                            // handle error
+                            console.log(error);
+                        })
+                },
+                onSave() {
+                    if (this.form.name == null || this.form.name == '') {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Name Field can't empty!",
+                            footer: '<a href="#">Why do I have this issue?</a>'
+                        });
+                        return
+                    }
+                    $.LoadingOverlay("show");
+                    let vm = this
+                    let input = this.form
+                    let api_url = "http://127.0.0.1:5000/admin/create-tag"
+                    axios.post(api_url, input)
+                        .then(function (response) {
+                            // handle success
+                            vm.fetchData()
+                            $.LoadingOverlay("hide");
+
+                        })
+                        .catch(function (error) {
+                            // handle error
+                            console.log(error);
+                        })
+                    this.clearForm()
+                },
+                getEdit(item) {
+                    this.status = 'Edit'
+                    this.form.id = item.id
+                    this.form.name = item.name
+                    this.form.description = item.description
+                    $('#model').modal('show')
+                },
+                edit() {
+                    if (this.form.name == null || this.form.name == '') {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Name Field can't empty!",
+                            footer: '<a href="#">Why do I have this issue?</a>'
+                        });
+                        return
+                    }
+                    $.LoadingOverlay("show");
+                    let vm = this
+                    let input = this.form
+                    let api_url = "http://127.0.0.1:5000/admin/update-tag"
+                    axios.post(api_url, input)
+                        .then(function (response) {
+                            // handle success
+                            vm.fetchData()
+                            $.LoadingOverlay("hide");
+
+                        })
+                        .catch(function (error) {
+                            // handle error
+                            console.log(error);
+                        })
+                    this.clearForm()
+                },
+                deleteRecord(id) {
+                    let vm = this
+                    Swal.fire({
+                        title: "Do you want to Delete?",
+                        showDenyButton: true,
+                        showCancelButton: false,
+                        confirmButtonText: "Yes Delete!",
+                        denyButtonText: `Cancel`
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            //this.student_list.splice(index, 1);
+                            // Swal.fire("Delete success!", "", "success");
+                            // alert('deleted' + id)
+                            $.LoadingOverlay("show");
+                            let vm = this
+                            let api_url = "http://127.0.0.1:5000/admin/delete-tag"
+                            axios.post(api_url, {tag_id:id})
+                                .then(function (response) {
+                                    // handle success
+                                    vm.fetchData()
+                                    console.log(response)
+                                    $.LoadingOverlay("hide");
+
+                                })
+                                .catch(function (error) {
+                                    // handle error
+                                    console.log(error);
+                                })
+                        } else if (result.isDenied) {
+                            Swal.fire("You are not Deleted", "", "info");
+                        }
+                    });
+
+                },
+                clearForm() {
+                    this.status = 'Add'
+                    this.form.id = null
+                    this.form.name = null
+                    this.form.gender = "male"
+                    this.form.password = null
+                    this.form.phone = "+855-"
+                    this.form.email = "test@gmail.com"
+                    this.form.address = ''
+                    $('#model').modal('hide')
+                },
+            }
+        }).mount('#app')
+    </script>
+{% endblock %}

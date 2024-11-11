@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+{% include  "navbar.html" %}
+<div class="container mt-5">
+    <div class="row">
+
+        <div class="col-12 mt-4">
+            <center>
+                <h3 class="mb-2 font-semibold ">Do you want to delete ?</h3>
+                <ul class="mb-3">
+                    <li>Name: {{ data[0]['name'] }}</li>
+                    <li>Gender: {{ data[0]['gender'] }}</li>
+                    <li>Phone: {{ data[0]['phone'] }}</li>
+                    <li>Email: {{ data[0]['email'] }}</li>
+
+                </ul>
+                <a
+                        href="{{ url_for('crud') }}"
+                        class="btn btn-sm btn-danger mr-4"
+                >Cancel</a>
+                <a href="/delete_user?id={{ data[0]['id'] }}" class="btn btn-sm btn-primary">Yes Delete !</a>
+            </center>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

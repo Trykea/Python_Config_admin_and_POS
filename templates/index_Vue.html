@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue Options API</title>
+</head>
+<body>
+<center>
+    <h1>Kark Calculator🆘</h1>
+
+<div id="app">
+    <label for="value_a">value A: </label>
+    <input v-model="value_a" id="value_a" type="number"> <br>
+    <br>
+    <label for="value_b">value B: </label>
+    <input v-model="value_b" id="value_b" type="number"> <br>
+    <br>
+    <input @click="sum" type="button" value="sum">
+    <input @click="minus" type="button" value="minus">
+    <input @click="multiply" type="button" value="multiply">
+    <input @click="divide" type="button" value="divide">
+    <br>
+    <h4>Result: A {{ operator }} B: {{ result }}</h4>
+</div>
+
+</center>
+
+</body>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+  const app = Vue.createApp({
+    data() {
+      return {
+        value_a: 0,
+        value_b: 0,
+        result: 0,
+        operator: "+"
+      }
+    },
+    methods: {
+      sum() {
+        this.operator = '+'
+        this.result = this.value_a + this.value_b
+      },
+      minus() {
+        this.operator = '-'
+        this.result = this.value_a - this.value_b
+      },
+      multiply() {
+        this.operator = 'x'
+        this.result = this.value_a * this.value_b
+      },
+      divide() {
+        this.operator = '/'
+        this.result = this.value_a / this.value_b
+      }
+    }
+  })
+
+  app.mount('#app')
+</script>
+</html>
+
+
+

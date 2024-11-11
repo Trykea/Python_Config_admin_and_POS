@@ -1,0 +1,305 @@
+{% extends 'admin/main_layout.html' %}
+{% block title %}{% endblock %}
+
+
+{% block content %}
+    <div id="app" class="content-wrapper">
+        <div class="container mt-4">
+            <!-- Store Info -->
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <h1>Store Name</h1>
+                    <p>Store Address and Information</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Left side: Product Information -->
+                <div class="col-md-6">
+                    <h3>Products</h3>
+                    <div class="container mt-4">
+
+                        <div>
+                            <button
+                                    v-for="(category, index) in this.category_list"
+                                    :key="'category_' + index"
+                                    type="button"
+                                    class="btn btn-outline-primary me-2 mb-2 mr-2"
+                                    @click="fetchByCategoryID(category.id)"
+                            >
+                                [[ category.name ]]
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex;justify-content: left;align-items:center; flex-wrap: wrap">
+                        <div
+                                class="col-md-4 mb-4"
+                                v-for="(item, index) in product_list"
+                                :key="'product_list_'+index"
+                        >
+
+                            <div @click="onProductClick(item)"
+                                 class="card">
+                                <img
+                                        :src="[[item.image]]"
+                                        class="card-img-top"
+                                        alt="Product Image"
+                                >
+                                <div class="card-body">
+                                    <h5 class="card-title">[[ item.name ]]</h5>
+                                    <p class="card-text">
+                                        <strong>Price:</strong> $[[ item.price ]]<br>
+                                        <strong>Discount:</strong> [[ item.cost || 'N/A' ]]%<br>
+                                        <strong>Category:</strong> [[ item.category ]]
+                                    </p>
+                                </div>
+                                <div class="card-footer text-muted">
+                                    <button class="btn btn-primary btn-sm">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right side: POS -->
+                <div class="col-md-6">
+                    <h3>POS</h3>
+                    <table class="table" style="table-layout: fixed;">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Amount</th>
+                            <th>Price</th>
+                            <th>Discount</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="pos-table-body" style="max-width: 100px; background-color: #9ca3af">
+                        <tr v-for="(item, index) in selected_item" :key="item.product_id">
+                            <td>[[item.name]]</td>
+                            <td>
+                                <input
+                                        autocomplete="off"
+                                        style="width: 60px; text-align: center"
+                                        type="number"
+                                        @input="calculateTotal"
+                                        v-model="item.qty">
+                            </td>
+                            <td>[[item.price]]</td>
+                            <td>% [[item.discount]]</td>
+                            <td>[[item.sub_total]]</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" @click="removeItem(index)">Delete</button>
+                            </td>
+                        </tr>
+                        </tbody>
+
+                        <tfoot>
+                        <!-- Total Row -->
+                        <tr>
+                            <td colspan="5" class="text-end"><strong>Total:</strong></td>
+                            <td class="text-end">[[ total ]]</td>
+                        </tr>
+
+                        <!-- Received Amount Row -->
+                        <tr>
+                            <td colspan="5" class="text-end"><strong>Received Amount:</strong></td>
+                            <td class="text-end">
+                                <input style="max-width: 80px" type="number" v-model="received_amount"
+                                       class="number text-left mr-6"
+                                       placeholder="Enter amount">
+                            </td>
+                        </tr>
+
+                        <tr v-if="this.received_amount > this.total">
+                            <td>
+                                <span>Change amount ($)</span>
+                            </td>
+                            <td>
+                                [[ (this.received_amount - this.total).toLocaleString() ]] $
+                            </td>
+                        </tr>
+
+                        <!-- Buttons Row -->
+                        <tr>
+                            <td colspan=" 6
+                            " class="text-center">
+                                <div class="d-flex justify-content-center ">
+                                    <button style="min-width: 100px" class="btn btn-danger me-2 mx-2"
+                                            @click="clearTable()">Cancel
+                                    </button>
+                                    <button style="min-width: 100px" class="btn btn-success mx-2"
+                                            @click="pay()">
+                                        Purchase
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        const {createApp, ref} = Vue
+        createApp({
+            delimiters: ['[[', ']]'],
+            created() {
+                {#this.fetchData()#}
+            },
+            mounted() {
+                //this.openModel()
+                this.fetchData()
+            },
+            data() {
+                return {
+                    form: {
+                        'id': null,
+                        'name': null,
+                        'cost': 0,
+                        'price': 0,
+                        'category_id': null,
+                        'unit_id': null,
+                        'brand_id': null,
+                        'tag_id': null,
+                        'description': '',
+                    },
+                    status: 'Add',
+                    product_list: [],
+                    category_list: [],
+                    brand_list: [],
+                    unit_list: [],
+                    tag_list: [],
+                    selected_item: [],
+                    txt_scr: null,
+                    total: 0,
+                    received_amount: 0,
+                }
+            },
+            methods: {
+
+                fetchData() {
+                    let vm = this
+                    $.LoadingOverlay("show");
+                    let api_url = "http://127.0.0.1:5000/admin/get-product"
+                    axios.get(api_url)
+                        .then(function (response) {
+                            vm.product_list = response.data.product_list
+                            vm.category_list = response.data.category_list
+                            vm.brand_list = response.data.brand_list
+                            vm.unit_list = response.data.unit_list
+                            vm.tag_list = response.data.tag_list
+                            $.LoadingOverlay("hide");
+
+                        })
+                        .catch(function (error) {
+                            // handle error
+                            console.log(error);
+                        })
+                },
+
+                fetchByCategoryID(category_id) {
+
+                    let vm = this
+                    $.LoadingOverlay("show");
+                    let api_url = "http://127.0.0.1:5000/admin/get-by-category?category_id=" + category_id
+                    axios.get(api_url)
+                        .then(function (response) {
+                            console.log(response.data)
+                            vm.product_list = response.data
+
+                            $.LoadingOverlay("hide");
+
+                        })
+                        .catch(function (error) {
+                            // handle error
+                            console.log(error);
+                        })
+                },
+                onProductClick(item) {
+                    let is_dpl = false
+                    let vm = this
+                    // check product duplicate
+                    let dpl = this.selected_item.find(obj => {
+                        if (obj.product_id == item.id) {
+                            obj.qty++
+                            obj.sub_total = (parseFloat(obj.qty) * parseFloat(obj.price)).toFixed(2);
+                            is_dpl = true
+                        }
+                    })
+                    // add new product
+                    if (is_dpl == false) {
+                        this.selected_item.push({
+                            'product_id': item.id,
+                            'name': item.name,
+                            'qty': 1,
+                            'price': item.price,
+                            'discount': 0,
+                            'sub_total': item.price,
+                        })
+                    }
+
+                    //sum as total
+                    this.calculateTotal()
+                },
+                calculateTotal() {
+                    let vm = this
+                    this.total = 0
+                    this.selected_item.forEach(obj => {
+                        let sub_total = parseFloat(obj.qty) * parseFloat(obj.price)
+                        vm.total += sub_total
+                    })
+                },
+                pay() {
+                    if (parseFloat(this.received_amount) >= parseFloat(this.total)) {
+                        let vm = this
+                        $.LoadingOverlay("show");
+                        let api_url = "http://127.0.0.1:5000/admin/pay"
+                        let input = {
+                            selected_item: vm.selected_item,
+                            total: vm.total,
+                            received_amount: vm.received_amount,
+                        }
+                        let change = vm.received_amount - vm.total
+                        axios.post(api_url, input)
+                            .then(function (response) {
+                                console.log(response)
+                                $.LoadingOverlay("hide");
+                                Swal.fire({
+                            icon: "success",
+                            title: "Payment complete",
+                            text: "Change amount: "+ change.toFixed(2)+ "$",
+                            footer: '<a href="#">Print Receipt</a>'
+                        });
+                            })
+                            .catch(function (error) { // handle error
+                                console.log(error);
+                            })
+
+                    } else {
+
+                                Swal.fire({
+                            icon: "error",
+                            title: "Payment incomplete",
+                            text: "Not enough money",
+                            footer: '<a href="#">Print Receipt</a>'
+                        });
+                    }
+                },
+                removeItem(index) {
+                    // Remove the item at the given index
+                    this.selected_item.splice(index, 1);
+                    // Recalculate the total after removing the item
+                    this.calculateTotal();
+                },
+
+            }
+        }).mount('#app')
+    </script>
+{% endblock %}

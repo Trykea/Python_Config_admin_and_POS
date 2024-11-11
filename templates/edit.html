@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    {% include  "navbar.html" %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <h2>Edit Contact</h2>
+                <form action="/update?id={{ data[0]['id'] }}" method="POST">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ data[0]['name'] }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select class="form-control" id="gender" name="gender">
+                            <option value="M" {% if data[0]['gender'] == 'M' %}selected{% endif %}>Male</option>
+                            <option value="F" {% if data[0]['gender'] == 'F' %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="text" class="form-control" id="phone" name="phone" value="{{ data[0]['phone'] }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ data[0]['email'] }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

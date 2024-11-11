@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shop Now</title>
+    <link href="../static/css/output.css" rel="stylesheet">
+
+</head>
+<body>
+{% include  "navbar.html" %}
+<div class="container " style="display: flex; justify-content: center; align-items: center; margin: 0 auto">
+    <div class="row">
+        <div class="card">
+            <div class="bg-white">
+                <div class="max-w-2xl px-4 py-6 sm:px-2 sm:py-12 lg:max-w-7xl lg:px-8">
+                    <h2 class="text-2xl font-bold tracking-tight text-gray-900"></h2>
+                    <div class="mt-6 **grid** **grid-cols-1 sm:grid-cols-2 lg:grid-cols-4** **gap-6 xl:gap-8**"
+                         style=" display: flex;  flex-wrap: wrap; align-items: center">
+                        <div class="group relative"
+                             style="max-width: 900px; min-width: 400px; margin: 12px auto; height: auto; display: flex; justify-content: center">
+                            <div class="">
+                                <img src="{{ product['image'] }}" alt="{{ product['image'] }}"
+                                     class="h-full w-full object-cover object-center lg:h-full lg:w-full"
+                                     style="height: fit-content">
+                            </div>
+                            <div style="margin-left: 40px">
+                                <h4 class="font-bold mt-2.5">Category: {{ product['category'] }}</h4>
+                                <div class="mt-4 flex justify-between">
+                                    <div>
+                                        <h3 class="text-sm  font-semibold">
+                                            <a href=""
+                                               target="_blank">
+                                                {#                                                <span aria-hidden="true" class="absolute inset-0"></span>#}
+                                                {{ product['title'] }}
+                                            </a>
+                                        </h3>
+                                    </div>
+                                    <p class="text-3xl font-bold text-gray-1200" style="margin-left: 30px">{{ product['price'] }}</p>
+                                </div>
+                                <h6 class=" text-gray-900 mt-2.5">{{ product['description'] }}</h6>
+                                <div style="margin-top: 16px;">
+                                    <a target="_self" href="/check_out?id={{ product['id'] }}">
+                                        <button class="inline-flex items-center px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-md">
+                                        <i class="fa-solid fa-cart-shopping" style="margin-right: 8px;"></i>
+
+                                        Book now
+                                    </button>
+                                    </a>
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+{% include "footer_script.html" %} }
+</html>
